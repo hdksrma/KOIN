@@ -1,11 +1,12 @@
-# My first blockchain - FirstChain
+# Creating the cryptocurrency Pesa
 
 import datetime
 import hashlib
 import json
-from flask import Flask, jsonify
-
-# Part 1 : Building the blockchain
+from flask import Flask, jsonify, request
+import requests
+from uuid  import uuid4
+from urllib.parse import urlparse
 
 class Blockchain: 
      
@@ -55,17 +56,9 @@ class Blockchain:
             block_index += 1
         return True
     
-# Part 2 : Mining the blockchain
-
-# Part 2.A : Creating a web app
-
 app = Flask(__name__)
 
-# Part 2.B : Creating a blockchain
-
 blockchain = Blockchain()
-
-# Part 2.C : Mining a new block
 
 @app.route('/mine_block', methods = ['GET'])
 def mine_block():
@@ -81,15 +74,11 @@ def mine_block():
                 'previous_hash': block['previous_hash']}
     return jsonify(response), 200
 
-# Part 2.D : Getting the full Blockchain
-
 @app.route('/get_chain', methods = ['GET'])
 def get_chain():
     response = {'chain': blockchain.chain,
                 'length': len(blockchain.chain)}
     return jsonify(response), 200
-
-# Part 2.D : Checking if the Blockchain is valid
 
 @app.route('/is_valid', methods = ['GET'])
 def is_valid():
@@ -99,7 +88,5 @@ def is_valid():
     else:
         response = {'message': 'Oops! The Blockchain invalid.'}
     return jsonify(response), 200
-
-# Part 2.D : Running the app
 
 app.run(host = '0.0.0.0', port = 5000)    
