@@ -93,6 +93,10 @@ class Blockchain:
                                            
 app = Flask(__name__)
 
+node_address = str(uuid4()).repalce('-', '')
+
+
+
 blockchain = Blockchain()
 
 @app.route('/mine_block', methods = ['GET'])
@@ -101,12 +105,14 @@ def mine_block():
     previous_proof = previous_block['proof']
     proof = blockchain.proof_of_work(previous_proof)
     previous_hash = blockchain.hash(previous_block)
+    blockchain.add_transaction(sender = node_address, reciever = 'Hardik', amount = 1000000)
     block = blockchain.create_block(proof, previous_hash)
     response = {'message': 'Congratulations, you just mined a block!',
                 'index': block['index'],
                 'timestamp': block['timestamp'],
                 'proof': block['proof'],
-                'previous_hash': block['previous_hash']}
+                'previous_hash': block['previous_hash'],
+                'transactions': block['transactions']}
     return jsonify(response), 200
 
 @app.route('/get_chain', methods = ['GET'])
