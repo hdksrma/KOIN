@@ -12,13 +12,18 @@ class Blockchain:
      
     def __init__(self):         
         self.chain = []  
+        self.transactions = []
         self.create_block(proof = 1, previous_hash = '0') # Genesis Block
+        self.nodes = set()    
          
     def create_block(self, proof, previous_hash):
         block = {'index' : len(self.chain) + 1,
                  'timestamp' : str(datetime.datetime.now()),
                  'proof' : proof,
-                 'previous_hash' : previous_hash}
+                 'previous_hash' : previous_hash,
+                 'transactions' : self.transactions }
+        
+        self.transactions = []
         self.chain.append(block)
         return block
     
@@ -56,6 +61,36 @@ class Blockchain:
             block_index += 1
         return True
     
+    def add_transaction(self, sender, reciever, amount):
+        self.transactions.append({'sender': sender,
+                                   'reciever': reciever,
+                                   'amount': amount})
+        previous_block = self.get_previous_block()
+        return previous_block['index'] + 1  
+
+    def add_node(self, adress):
+        parsed_url = urlparse(adress)
+        self.nodes.add(parsed_url.netloc)
+    
+    def replace_chain(self):
+        network = self.nodes
+        longest_chain = None
+        max_length = len(self.chain)
+        for nodes in network:
+            response = requests.get(f'http://127.0.0.1:5000/get_chain')
+            if response.status_code == 200:
+                length = response.json()['length']
+                chain = response.json()['chain']
+                if length > max_length and self.is_chain_valid(chain):
+                    max_length = length
+                    longest_chain = chain
+    
+        if longest_chain:
+            self.chain = longest_chain 
+            return True
+
+        return False 
+                                           
 app = Flask(__name__)
 
 blockchain = Blockchain()
