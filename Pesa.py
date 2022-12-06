@@ -116,12 +116,14 @@ def mine_block():
     return jsonify(response), 200
 
 @app.route('/get_chain', methods = ['GET'])
+
 def get_chain():
     response = {'chain': blockchain.chain,
                 'length': len(blockchain.chain)}
     return jsonify(response), 200
 
 @app.route('/is_valid', methods = ['GET'])
+
 def is_valid():
     is_valid = blockchain.is_chain_valid(blockchain.chain)
     if is_valid:
@@ -130,4 +132,40 @@ def is_valid():
         response = {'message': 'Oops! The Blockchain invalid.'}
     return jsonify(response), 200
 
-app.run(host = '0.0.0.0', port = 5000)    
+@app.route('/add_transaction', methods = ['POST'])
+
+def add_transaction():
+    json = request.get_json()
+    transaction_keys = ['sender', 'reciever', 'amount']
+    if not all (key in json for key in transaction_keys):
+        return 'some elements of the t ransaction are missing'
+    index = blockchain.add_transaction(json['sender'], json['reciever'], ['amount']) 
+    response = {'message': f'This transaction will be added to Block {index}'}
+    return jsonify(response), 201
+
+@app.route('/connect_node', methods = ['POST'])
+
+def connect_node():
+    json = request.get_json()
+    nodes = json.get('nodes')
+    if nodes is None:
+        return "No Node", 400
+    for node in nodes:
+        blockchain.add_node(node)
+    response = {'message': 'All the nodes are now connected. Pesa blockchain now contains the following nodes:' ,
+                'total_nodes': list(blockchain.nodes)}
+    return jsonify(response) 
+
+@app.route('/replace_chain', methods = ['GET'])
+
+def replace_chain():
+    is_chain_replaced = blockchain.replace_chain()
+    if is_chain_replaced:
+        response = {'message': 'The nodes had different chains so the chain was replaced by the longest one.',
+                    'new_chain': blockchain.chain}
+    else:
+        response = {'message': 'All good! The chain is the largest one.',
+                    'actual_chain': blockchain.chain}
+    return jsonify(response), 200
+
+app.run(host = '0.0.0.0', port = 5000) 
