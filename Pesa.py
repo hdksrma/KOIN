@@ -93,7 +93,7 @@ class Blockchain:
                                            
 app = Flask(__name__)
 
-node_address = str(uuid4()).repalce('-', '')
+node_address = str(uuid4()).replace('-', '')
 
 
 
